@@ -1,0 +1,12 @@
+# Direct dependencies inferred from the research code.
+# This is not a version-locked or freshly reproduced environment.
+numpy
+pandas
+scikit-learn
+torch
+xgboost
+lightgbm
+catboost
+matplotlib
+tqdm
+Pillow

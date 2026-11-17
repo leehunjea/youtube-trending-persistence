@@ -1,0 +1,46 @@
+# Local research inputs and generated outputs
+/data/
+/models/
+/output/
+/local_archive/
+/catboost_info/
+/figures/
+/figures_1col/
+/figures_v3/
+
+# Environments, caches, and editor state
+/run_env/
+/kaggle_env/
+/.venv/
+/venv/
+/.agents/
+/.vscode/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+
+# Credentials and local settings
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Individual records, weights, serialized arrays, and manuscripts
+*.csv
+!results/tables/*.csv
+*.npz
+*.npy
+*.pkl
+*.pickle
+*.pt
+*.pth
+*.cbm
+*.hwp
+*.hwpx
+*.docx
+*.pdf
+*.zip
+*.log
