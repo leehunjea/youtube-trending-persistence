@@ -114,4 +114,4 @@ df_tag.to_csv(
 
 print(f"  ✅ output/raw_popular.csv 저장 완료")
 print(f"  ✅ output/raw_tag.csv 저장 완료")
-print(f"\n[{datetime.now().strftime('%H:%M:%S')}] ✅ 1단계 완료! → 2_preprocess.py 실행하세요")
+print(f"\n[{datetime.now().strftime('%H:%M:%S')}] ✅ 1단계 완료! → python scripts/preprocessing/2_preprocess.py 실행하세요")

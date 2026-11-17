@@ -4,7 +4,7 @@ import pickle
 import numpy as np
 import pandas as pd
 
-root = Path(__file__).resolve().parent
+root = Path(__file__).resolve().parents[2]
 out = root / "output"
 
 print("== label metadata ==")

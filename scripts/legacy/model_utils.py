@@ -53,7 +53,7 @@ def load_data(label=LABEL):
     # Feature 존재 여부 확인
     missing = [f for f in FEATURES if f not in df.columns]
     if missing:
-        raise ValueError(f"누락된 Feature: {missing}\n2_preprocess.py 먼저 실행하세요.")
+        raise ValueError(f"누락된 Feature: {missing}\nscripts/preprocessing/2_preprocess.py 먼저 실행하세요.")
 
     X = df[FEATURES].fillna(0)
     y = df[label]

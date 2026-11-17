@@ -63,12 +63,12 @@ The reported values match the archived CSV files. Training and evaluation were n
 
 | Purpose | File |
 |:---|:---|
-| Preprocess raw CSVs and construct labels | [2_preprocess.py](2_preprocess.py) |
-| Build early-observation sequences and splits | [4_make_sequence.py](4_make_sequence.py) |
-| Machine learning and deep learning experiments | [3_run_ml_v2.py](3_run_ml_v2.py) · [5_run_dl.py](5_run_dl.py) |
-| v3 machine learning tables and evaluation | [ml_tables_v3.py](ml_tables_v3.py) · [eval_v3_main.py](eval_v3_main.py) |
-| Deep learning evaluation | [eval_dl_v3.py](eval_dl_v3.py) |
-| Plot saved v3 metrics | [9_paper_figures_v3.py](9_paper_figures_v3.py) |
+| Preprocess raw CSVs and construct labels | [2_preprocess.py](scripts/preprocessing/2_preprocess.py) |
+| Build early-observation sequences and splits | [4_make_sequence.py](scripts/preprocessing/4_make_sequence.py) |
+| Machine learning and deep learning experiments | [3_run_ml_v2.py](scripts/training/3_run_ml_v2.py) · [5_run_dl.py](scripts/training/5_run_dl.py) |
+| v3 machine learning tables and evaluation | [ml_tables_v3.py](scripts/evaluation/ml_tables_v3.py) · [eval_v3_main.py](scripts/evaluation/eval_v3_main.py) |
+| Deep learning evaluation | [eval_dl_v3.py](scripts/evaluation/eval_dl_v3.py) |
+| Plot saved v3 metrics | [9_paper_figures_v3.py](scripts/visualization/9_paper_figures_v3.py) |
 
 The code contains several historical experiment branches. Running every numbered file in order is not a single final reproduction pipeline. See the [code map](docs/CODE_MAP.md) (Korean) for branch roles and portability changes made to public copies.
 
@@ -77,14 +77,21 @@ Technologies: **Python · pandas · scikit-learn · PyTorch · XGBoost · LightG
 ## Layout and Usage
 
 ~~~text
-*.py                  Research preprocessing, training, evaluation, and plotting
-requirements.txt      Direct research dependencies
-results/tables/       Aggregate results without per-video identifiers
-results/figures/      Selected result plots
-docs/                 Environment, code, and result provenance notes
+scripts/
+  preprocessing/   Data preparation and sequence construction
+  training/        Model training and hybrid experiments
+  evaluation/      Model comparison, predictions, and evaluation
+  analysis/        Feature, observation-length, and threshold studies
+  visualization/   Result plotting
+  tools/           Data and feature checks
+  legacy/          Earlier ML and DL experiments
+results/           Selected aggregate tables and figures
+docs/              Paper, code, environment, and result notes
+requirements.txt   Direct dependencies
+CITATION.*         Paper citation metadata
 ~~~
 
-Run scripts from the repository root after preparing the required data, processed arrays, and model files. This is a research code archive; the [data and environment guide](docs/DATA_AND_ENVIRONMENT.md) includes setup notes and an English summary.
+Run scripts **from the repository root**, for example `python scripts/preprocessing/2_preprocess.py`, after preparing the required data, processed arrays, and model files. See the [script directory guide](scripts/README.md) and [data and environment guide](docs/DATA_AND_ENVIRONMENT.md), which includes an English summary.
 
 Raw data, per-video predictions, model weights, manuscripts, and review correspondence remain in the local research archive. Installation metadata from the original environments is retained; create a fresh environment to run experiments. The public package contains code, documentation, and selected aggregate results.
 

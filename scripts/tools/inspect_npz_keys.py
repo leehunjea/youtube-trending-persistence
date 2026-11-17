@@ -1,7 +1,7 @@
 from pathlib import Path
 import numpy as np
 
-out = Path(__file__).resolve().parent / "output"
+out = Path(__file__).resolve().parents[2] / "output"
 for name in ["kr_sequences_K14.npz", "kr_sequences_K5.npz"]:
     data = np.load(out / name, allow_pickle=True)
     print("==", name, "==")

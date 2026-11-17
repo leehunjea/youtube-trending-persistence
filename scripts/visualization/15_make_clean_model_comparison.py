@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-BASE = Path(__file__).resolve().parent
+BASE = Path(__file__).resolve().parents[2]
 OUTPUT = BASE / "output"
 WHITE = BASE / "figures" / "white"
 KCI = BASE / "figures" / "kci"

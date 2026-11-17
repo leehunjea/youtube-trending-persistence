@@ -11,7 +11,7 @@ import textwrap
 from PIL import Image, ImageDraw, ImageFont
 
 
-BASE = Path(__file__).resolve().parent
+BASE = Path(__file__).resolve().parents[2]
 FIGDIR = BASE / "figures"
 OUTDIR = FIGDIR / "kci"
 OUTDIR.mkdir(parents=True, exist_ok=True)

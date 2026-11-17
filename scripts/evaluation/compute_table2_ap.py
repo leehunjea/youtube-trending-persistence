@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-OUT = Path(__file__).resolve().parent / "output"
+OUT = Path(__file__).resolve().parents[2] / "output"
 
 files = [
     ("CatBoost", "preds_CatBoost_v2.csv"),

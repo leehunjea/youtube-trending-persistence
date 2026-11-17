@@ -147,4 +147,4 @@ for pct,cut in [("p65",55),("p70",57),("p75",60),("p80",63),("p85",66)]:
 pd.DataFrame(rows11).to_csv(f"{OUT}/tab11_thresh_v3.csv",index=False,encoding="utf-8-sig")
 
 print("\n저장 완료: tab6/7/9/10/11_*_v3.csv")
-print("표12(temporal)은 ml_tables_v3_temporal.py에서 별도 처리")
+print("표12(temporal)은 scripts/evaluation/ml_tables_v3_temporal.py에서 별도 처리")

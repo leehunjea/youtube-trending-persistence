@@ -349,4 +349,4 @@ for item in all_preds:
     print(f"  ✅ preds_{item['name']}.csv")
 
 print(f"\n총 {len(all_preds)}개 모델 예측값 저장 완료")
-print("→ python 6b_bootstrap_ci.py 실행하세요")
+print("→ python scripts/evaluation/6b_bootstrap_ci.py 실행하세요")

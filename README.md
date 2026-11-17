@@ -67,12 +67,12 @@ K별 대상 영상 수가 달라, 동일한 표본에서 관측 길이만 바꾼
 
 | 목적 | 파일 |
 |:---|:---|
-| 원본 CSV 전처리와 영상별 라벨 생성 | [2_preprocess.py](2_preprocess.py) |
-| 초기 K개 관측의 시퀀스와 데이터 분할 구성 | [4_make_sequence.py](4_make_sequence.py) |
-| 머신러닝·딥러닝 실험 | [3_run_ml_v2.py](3_run_ml_v2.py) · [5_run_dl.py](5_run_dl.py) |
-| v3 머신러닝 집계와 평가 | [ml_tables_v3.py](ml_tables_v3.py) · [eval_v3_main.py](eval_v3_main.py) |
-| 딥러닝 평가 | [eval_dl_v3.py](eval_dl_v3.py) |
-| 저장된 v3 수치의 시각화 | [9_paper_figures_v3.py](9_paper_figures_v3.py) |
+| 원본 CSV 전처리와 영상별 라벨 생성 | [2_preprocess.py](scripts/preprocessing/2_preprocess.py) |
+| 초기 K개 관측의 시퀀스와 데이터 분할 구성 | [4_make_sequence.py](scripts/preprocessing/4_make_sequence.py) |
+| 머신러닝·딥러닝 실험 | [3_run_ml_v2.py](scripts/training/3_run_ml_v2.py) · [5_run_dl.py](scripts/training/5_run_dl.py) |
+| v3 머신러닝 집계와 평가 | [ml_tables_v3.py](scripts/evaluation/ml_tables_v3.py) · [eval_v3_main.py](scripts/evaluation/eval_v3_main.py) |
+| 딥러닝 평가 | [eval_dl_v3.py](scripts/evaluation/eval_dl_v3.py) |
+| 저장된 v3 수치의 시각화 | [9_paper_figures_v3.py](scripts/visualization/9_paper_figures_v3.py) |
 
 실험은 여러 시기에 작성된 분기로 구성됩니다. 파일 번호 전체가 하나의 최종 실행 순서를 뜻하지는 않습니다. 분기별 역할과 공개 사본의 경로 변경은 [코드 안내](docs/CODE_MAP.md)에 정리했습니다.
 
@@ -81,14 +81,21 @@ K별 대상 영상 수가 달라, 동일한 표본에서 관측 길이만 바꾼
 ## 구성과 실행
 
 ~~~text
-*.py                  전처리·학습·평가·시각화 연구 코드
-requirements.txt      연구 코드의 직접 의존성
-results/tables/       영상별 ID를 제외한 집계 결과
-results/figures/      대표 결과 그림
-docs/                 실행·코드·결과 출처 안내
+scripts/
+  preprocessing/   데이터 전처리·시퀀스 생성
+  training/        모델 학습·하이브리드 실험
+  evaluation/      모델 비교·예측·평가
+  analysis/        특성·관측 길이·임곗값 분석
+  visualization/   결과 그림 생성
+  tools/           데이터·특성 점검
+  legacy/          초기 ML·DL 실험
+results/           선별한 집계표와 대표 그림
+docs/              논문·코드·환경·결과 안내
+requirements.txt   직접 의존성
+CITATION.*         논문 인용 정보
 ~~~
 
-이 저장소는 연구 코드 아카이브입니다. 실행 시 저장소 루트를 작업 디렉터리로 사용하고, 필요한 데이터·전처리 배열·모델을 별도로 준비해야 합니다. [데이터와 환경 안내](docs/DATA_AND_ENVIRONMENT.md)
+이 저장소는 연구 코드 아카이브입니다. **저장소 루트에서** `python scripts/preprocessing/2_preprocess.py`와 같이 실행합니다. 필요한 데이터·전처리 배열·모델은 별도로 준비해야 합니다. [코드 폴더 안내](scripts/README.md) · [데이터와 환경 안내](docs/DATA_AND_ENVIRONMENT.md)
 
 원본 데이터, 영상별 예측값, 모델 가중치, 논문 원고와 심사 대응 자료는 로컬 연구 아카이브에 보관합니다. 기존 가상환경의 설치 정보도 기록했으며, 실행 환경은 새로 구성합니다. 공개본에는 코드·설명·선별한 집계 결과를 포함했습니다.
 

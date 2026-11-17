@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-p = Path(__file__).resolve().parent / "output" / "kr_snapshot.csv"
+p = Path(__file__).resolve().parents[2] / "output" / "kr_snapshot.csv"
 df_head = pd.read_csv(p, nrows=5)
 print("columns:", df_head.columns.tolist())
 print(df_head.to_string(index=False))

@@ -1,10 +1,12 @@
 """
-Transformer encoder + CatBoost hybrid model for revision.
+Hybrid Transformer + tabular-summary model for revision.
 
-Stage 1: Train a Transformer sequence encoder on the K=14 snapshot sequence.
-Stage 2: Extract the Transformer's CLS embedding and concatenate it with the
-         71 summary/domain tabular features.
-Stage 3: Train CatBoost on the hybrid feature vector and evaluate on test set.
+The model uses:
+- K=14 sequence matrix (B, K, 7) for temporal pattern learning.
+- 71 ML summary/domain features for tabular signal learning.
+
+This addresses the review concern that tree models and sequence deep learning
+models used different feature representations.
 """
 from pathlib import Path
 import math
@@ -14,12 +16,11 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from catboost import CatBoostClassifier
 from sklearn.metrics import average_precision_score, f1_score, precision_score, recall_score, roc_auc_score
 from torch.utils.data import DataLoader, Dataset
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[2]
 OUTPUT = ROOT / "output"
 MODELS = ROOT / "models"
 RANDOM_STATE = 42
@@ -48,10 +49,8 @@ def make_ml_features(X_seq, X_static, seq_features, static_features):
         seq = X_seq[i]
         st = X_static[i]
         feat = {}
-
         for j, name in enumerate(static_features):
             feat[name] = st[j]
-
         for j, name in enumerate(available_seq):
             col = seq[:, j]
             values = {
@@ -72,7 +71,6 @@ def make_ml_features(X_seq, X_static, seq_features, static_features):
         mom_col = seq[:, available_seq.index("momentum")]
         rd_col = seq[:, available_seq.index("rank_delta")]
         va_col = seq[:, available_seq.index("views_acceleration")]
-
         feat["rank_improvement"] = rank_col[0] - rank_col[-1]
         feat["peak_momentum"] = mom_col.max()
         feat["momentum_trend"] = mom_col[-1] - mom_col[0]
@@ -85,9 +83,10 @@ def make_ml_features(X_seq, X_static, seq_features, static_features):
     return pd.DataFrame(rows)
 
 
-class SeqDataset(Dataset):
-    def __init__(self, x_seq, mask, y, idx):
+class HybridDataset(Dataset):
+    def __init__(self, x_seq, x_tab, mask, y, idx):
         self.x_seq = x_seq
+        self.x_tab = x_tab
         self.mask = mask
         self.y = y
         self.idx = idx
@@ -97,7 +96,7 @@ class SeqDataset(Dataset):
 
     def __getitem__(self, i):
         n = self.idx[i]
-        return self.x_seq[n], self.mask[n], self.y[n]
+        return self.x_seq[n], self.x_tab[n], self.mask[n], self.y[n]
 
 
 class PositionalEncoding(nn.Module):
@@ -114,8 +113,8 @@ class PositionalEncoding(nn.Module):
         return x + self.pe[:, : x.shape[1], :]
 
 
-class SequenceTransformer(nn.Module):
-    def __init__(self, seq_dim):
+class HybridTransformerTabular(nn.Module):
+    def __init__(self, seq_dim, tab_dim):
         super().__init__()
         self.cls = nn.Parameter(torch.zeros(1, 1, D_MODEL))
         self.seq_proj = nn.Linear(seq_dim, D_MODEL)
@@ -129,171 +128,149 @@ class SequenceTransformer(nn.Module):
             norm_first=True,
         )
         self.encoder = nn.TransformerEncoder(enc, num_layers=LAYERS)
-        self.head = nn.Sequential(
-            nn.Linear(D_MODEL, 128),
+        self.tabular = nn.Sequential(
+            nn.Linear(tab_dim, 128),
             nn.LayerNorm(128),
             nn.ReLU(),
             nn.Dropout(DROPOUT),
-            nn.Linear(128, 1),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+        )
+        self.head = nn.Sequential(
+            nn.Linear(D_MODEL + 64, 192),
+            nn.LayerNorm(192),
+            nn.ReLU(),
+            nn.Dropout(DROPOUT),
+            nn.Linear(192, 64),
+            nn.ReLU(),
+            nn.Dropout(DROPOUT * 0.5),
+            nn.Linear(64, 1),
         )
 
-    def encode(self, x_seq, mask):
+    def forward(self, x_seq, x_tab, mask):
         bsz = x_seq.shape[0]
         x = self.pos(self.seq_proj(x_seq))
         cls = self.cls.expand(bsz, -1, -1)
         x = torch.cat([cls, x], dim=1)
         full_mask = torch.cat([torch.ones(bsz, 1, device=mask.device), mask], dim=1)
         x = self.encoder(x, src_key_padding_mask=(full_mask == 0))
-        return x[:, 0, :]
+        seq_repr = x[:, 0, :]
+        tab_repr = self.tabular(x_tab)
+        return self.head(torch.cat([seq_repr, tab_repr], dim=1)).squeeze(1)
 
-    def forward(self, x_seq, mask):
-        return self.head(self.encode(x_seq, mask)).squeeze(1)
 
-
-def eval_encoder(model, loader, criterion):
+def evaluate(model, loader, criterion):
     model.eval()
-    losses, probs, labels = [], [], []
+    losses = []
+    probs = []
+    labels = []
     with torch.no_grad():
-        for x_seq, mask, y in loader:
+        for x_seq, x_tab, mask, y in loader:
             x_seq = x_seq.to(DEVICE)
+            x_tab = x_tab.to(DEVICE)
             mask = mask.to(DEVICE)
             y = y.to(DEVICE)
-            logits = model(x_seq, mask)
+            logits = model(x_seq, x_tab, mask)
             losses.append(criterion(logits, y).item())
             probs.extend(torch.sigmoid(logits).cpu().numpy().tolist())
             labels.extend(y.cpu().numpy().tolist())
     return float(np.mean(losses)), np.array(probs), np.array(labels)
 
 
-def extract_embeddings(model, x_seq_t, mask_t):
-    model.eval()
-    loader = DataLoader(
-        torch.utils.data.TensorDataset(x_seq_t, mask_t),
-        batch_size=512,
-        shuffle=False,
-    )
-    embs = []
-    with torch.no_grad():
-        for x_seq, mask in loader:
-            emb = model.encode(x_seq.to(DEVICE), mask.to(DEVICE)).cpu().numpy()
-            embs.append(emb)
-    return np.vstack(embs)
-
-
 def main():
     data = np.load(OUTPUT / "kr_sequences_K14.npz", allow_pickle=True)
     with open(OUTPUT / "scalers.pkl", "rb") as f:
         scalers = pickle.load(f)
+    seq_features = scalers["seq_features"]
+    static_features = scalers["static_features"]
 
+    x_tab = make_ml_features(data["X_seq"], data["X_static"], seq_features, static_features).values.astype("float32")
     x_seq = data["X_seq"].astype("float32")
     mask = data["mask"].astype("float32")
     y = data["y_cls"].astype("float32")
     train_idx = data["train_idx"]
     val_idx = data["val_idx"]
     test_idx = data["test_idx"]
-    trainval_idx = np.concatenate([train_idx, val_idx])
-
-    x_tab_df = make_ml_features(
-        data["X_seq"],
-        data["X_static"],
-        scalers["seq_features"],
-        scalers["static_features"],
-    )
-    x_tab = x_tab_df.values.astype("float32")
 
     x_seq_t = torch.tensor(x_seq)
+    x_tab_t = torch.tensor(x_tab)
     mask_t = torch.tensor(mask)
     y_t = torch.tensor(y)
 
-    train_loader = DataLoader(SeqDataset(x_seq_t, mask_t, y_t, train_idx), batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
-    val_loader = DataLoader(SeqDataset(x_seq_t, mask_t, y_t, val_idx), batch_size=BATCH_SIZE, shuffle=False)
+    train_loader = DataLoader(HybridDataset(x_seq_t, x_tab_t, mask_t, y_t, train_idx), batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
+    val_loader = DataLoader(HybridDataset(x_seq_t, x_tab_t, mask_t, y_t, val_idx), batch_size=BATCH_SIZE, shuffle=False)
+    test_loader = DataLoader(HybridDataset(x_seq_t, x_tab_t, mask_t, y_t, test_idx), batch_size=BATCH_SIZE, shuffle=False)
 
     pos_weight = torch.tensor([(y[train_idx] == 0).sum() / max((y[train_idx] == 1).sum(), 1)], dtype=torch.float32).to(DEVICE)
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-    encoder = SequenceTransformer(seq_dim=x_seq.shape[2]).to(DEVICE)
-    optimizer = torch.optim.AdamW(encoder.parameters(), lr=LR, weight_decay=1e-3)
+    model = HybridTransformerTabular(x_seq.shape[2], x_tab.shape[1]).to(DEVICE)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=1e-3)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=EPOCHS)
-    best_path = MODELS / "TransformerEncoderForCatBoost_K14_best.pt"
 
     print(f"Device={DEVICE}, X_seq={x_seq.shape}, X_tab={x_tab.shape}, pos_weight={pos_weight.item():.4f}")
     best_auc = -1.0
     patience = 0
     history = []
+    best_path = MODELS / "HybridTransformerTabular_K14_best.pt"
 
     for epoch in range(1, EPOCHS + 1):
-        encoder.train()
+        model.train()
         train_losses = []
-        for x_seq_b, mask_b, y_b in train_loader:
+        for x_seq_b, x_tab_b, mask_b, y_b in train_loader:
             x_seq_b = x_seq_b.to(DEVICE)
+            x_tab_b = x_tab_b.to(DEVICE)
             mask_b = mask_b.to(DEVICE)
             y_b = y_b.to(DEVICE)
             optimizer.zero_grad()
-            logits = encoder(x_seq_b, mask_b)
+            logits = model(x_seq_b, x_tab_b, mask_b)
             loss = criterion(logits, y_b)
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(encoder.parameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
             train_losses.append(loss.item())
         scheduler.step()
 
-        val_loss, val_prob, val_true = eval_encoder(encoder, val_loader, criterion)
+        val_loss, val_prob, val_true = evaluate(model, val_loader, criterion)
         val_auc = roc_auc_score(val_true, val_prob)
-        history.append(
-            {
-                "epoch": epoch,
-                "train_loss": float(np.mean(train_losses)),
-                "val_loss": val_loss,
-                "val_auc": val_auc,
-            }
-        )
-        print(f"Epoch {epoch:02d}/{EPOCHS} train={np.mean(train_losses):.4f} val={val_loss:.4f} val_auc={val_auc:.4f}")
+        row = {
+            "epoch": epoch,
+            "train_loss": float(np.mean(train_losses)),
+            "val_loss": val_loss,
+            "val_auc": val_auc,
+        }
+        history.append(row)
+        print(f"Epoch {epoch:02d}/{EPOCHS} train={row['train_loss']:.4f} val={val_loss:.4f} val_auc={val_auc:.4f}")
+
         if val_auc > best_auc:
             best_auc = val_auc
             patience = 0
-            torch.save(encoder.state_dict(), best_path)
+            torch.save(model.state_dict(), best_path)
         else:
             patience += 1
             if patience >= PATIENCE:
                 print(f"Early stopping at epoch {epoch}")
                 break
 
-    encoder.load_state_dict(torch.load(best_path, map_location=DEVICE))
-    seq_emb = extract_embeddings(encoder, x_seq_t, mask_t)
-    hybrid = np.hstack([x_tab, seq_emb]).astype("float32")
-
-    scale_pos = (y[trainval_idx] == 0).sum() / max((y[trainval_idx] == 1).sum(), 1)
-    cb = CatBoostClassifier(
-        iterations=500,
-        learning_rate=0.05,
-        scale_pos_weight=scale_pos,
-        verbose=0,
-        random_seed=RANDOM_STATE,
-    )
-    cb.fit(hybrid[trainval_idx], y[trainval_idx].astype(int))
-    prob = cb.predict_proba(hybrid[test_idx])[:, 1]
-    y_test = y[test_idx].astype(int)
-    pred = (prob >= 0.5).astype(int)
-
+    model.load_state_dict(torch.load(best_path, map_location=DEVICE))
+    _, test_prob, test_true = evaluate(model, test_loader, criterion)
+    test_pred = (test_prob >= 0.5).astype(int)
     result = {
-        "model": "Transformer-CatBoost Hybrid",
+        "model": "Hybrid Transformer+Tabular",
         "K_EARLY": 14,
-        "roc_auc": roc_auc_score(y_test, prob),
-        "ap": average_precision_score(y_test, prob),
-        "f1": f1_score(y_test, pred),
-        "precision": precision_score(y_test, pred, zero_division=0),
-        "recall": recall_score(y_test, pred, zero_division=0),
-        "best_encoder_val_auc": best_auc,
+        "roc_auc": roc_auc_score(test_true, test_prob),
+        "ap": average_precision_score(test_true, test_prob),
+        "f1": f1_score(test_true, test_pred),
+        "precision": precision_score(test_true, test_pred, zero_division=0),
+        "recall": recall_score(test_true, test_pred, zero_division=0),
+        "best_val_auc": best_auc,
         "n_tabular_features": x_tab.shape[1],
-        "n_transformer_embedding": seq_emb.shape[1],
-        "n_hybrid_features": hybrid.shape[1],
+        "n_sequence_features": x_seq.shape[2],
     }
-    pd.DataFrame([result]).to_csv(OUTPUT / "transformer_catboost_hybrid_K14_result.csv", index=False, encoding="utf-8-sig")
-    pd.DataFrame(history).to_csv(OUTPUT / "transformer_catboost_hybrid_K14_history.csv", index=False, encoding="utf-8-sig")
-    pd.DataFrame({"y_true": y_test, "y_pred": prob}).to_csv(OUTPUT / "preds_TransformerCatBoostHybrid_K14.csv", index=False, encoding="utf-8-sig")
-    pd.DataFrame(seq_emb, columns=[f"tr_emb_{i:02d}" for i in range(seq_emb.shape[1])]).to_csv(
-        OUTPUT / "transformer_K14_cls_embeddings.csv", index=False, encoding="utf-8-sig"
+    pd.DataFrame([result]).to_csv(OUTPUT / "hybrid_transformer_tabular_K14_result.csv", index=False, encoding="utf-8-sig")
+    pd.DataFrame(history).to_csv(OUTPUT / "hybrid_transformer_tabular_K14_history.csv", index=False, encoding="utf-8-sig")
+    pd.DataFrame({"y_true": test_true.astype(int), "y_pred": test_prob}).to_csv(
+        OUTPUT / "preds_HybridTransformerTabular_K14.csv", index=False, encoding="utf-8-sig"
     )
-
     print(pd.DataFrame([result]).round(4).to_string(index=False))
 
 

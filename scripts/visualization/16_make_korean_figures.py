@@ -12,7 +12,7 @@ import pandas as pd
 from sklearn.metrics import average_precision_score, precision_recall_curve
 
 
-BASE = Path(__file__).resolve().parent
+BASE = Path(__file__).resolve().parents[2]
 OUTPUT = BASE / "output"
 KOR = BASE / "figures" / "korean"
 KOR.mkdir(parents=True, exist_ok=True)

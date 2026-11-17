@@ -11,7 +11,7 @@ output/    전처리 결과·시퀀스·분할 인덱스·영상별 예측
 models/    학습한 모델과 체크포인트
 ~~~
 
-필요한 로컬 자료를 해당 경로에 준비한 뒤 **저장소 루트**에서 스크립트를 실행합니다. 원본 두 CSV의 합계는 약 129.4GB입니다. 메모리와 실행 시간은 데이터 크기 및 선택한 실험에 따라 달라집니다. 공개된 집계 결과를 열어 보는 데에는 원본 데이터가 필요하지 않습니다.
+필요한 로컬 자료를 해당 경로에 준비한 뒤 **저장소 루트**에서 `python scripts/<분류>/<파일>.py` 형식으로 실행합니다. 입력 data와 출력 output/models는 scripts 하위가 아닌 저장소 최상위 경로를 사용합니다. 원본 두 CSV의 합계는 약 129.4GB입니다. 메모리와 실행 시간은 데이터 크기 및 선택한 실험에 따라 달라집니다. 공개된 집계 결과를 열어 보는 데에는 원본 데이터가 필요하지 않습니다.
 
 ## 환경 준비
 
@@ -42,7 +42,7 @@ python -m venv .venv
 ## 실험 선택
 
 1. [코드 안내](CODE_MAP.md)에서 필요한 실험 분기를 선택합니다.
-2. 전처리를 시작하려면 원본 CSV를 준비하고 2_preprocess.py, 4_make_sequence.py의 설정을 확인합니다.
+2. 전처리를 시작하려면 원본 CSV를 준비하고 [전처리](../scripts/preprocessing/2_preprocess.py), [시퀀스 생성](../scripts/preprocessing/4_make_sequence.py)의 설정을 확인합니다.
 3. 후속 실험은 기존 전처리 파일·모델 등 각 스크립트가 읽는 입력을 확인한 뒤 실행합니다.
 
 선택적 점검 도구인 1_load_data.py는 output/raw_popular.csv와 output/raw_tag.csv를 추가로 내보냅니다. 현재 전처리는 이 사본이 아닌 원본 CSV를 직접 읽습니다. 로컬의 기존 내보내기 사본 두 개(약 58.7GB)는 정리했으며, 이 도구를 실행하면 다시 생성될 수 있습니다.
@@ -53,7 +53,7 @@ python -m venv .venv
 
 ## English summary
 
-Keep the original CSVs under data/youtube_trends/ and run scripts from the repository root. Generated arrays and predictions belong in output/; checkpoints belong in models/. These directories are excluded from Git.
+Keep the original CSVs under data/youtube_trends/ and run scripts from the repository root using `python scripts/<category>/<file>.py`. Generated arrays and predictions belong in the root output/ directory; checkpoints belong in the root models/ directory. These directories are excluded from Git. Do not change into a script subdirectory before running it.
 
 Create a fresh environment and install the direct dependencies in requirements.txt. The version table above records metadata from two former environments; it is not a tested lockfile or a claim that either environment reproduces all results. The environment directories were removed with approval after preserving package lists and installation metadata.
 

@@ -1,7 +1,7 @@
 from pathlib import Path
 import pandas as pd
 
-p = Path(__file__).resolve().parent / "output" / "kr_snapshot.csv"
+p = Path(__file__).resolve().parents[2] / "output" / "kr_snapshot.csv"
 df = pd.read_csv(p, usecols=["collection_date", "published_at", "video_id"])
 cd = pd.to_datetime(df["collection_date"], errors="coerce")
 pa = pd.to_datetime(df["published_at"], errors="coerce")

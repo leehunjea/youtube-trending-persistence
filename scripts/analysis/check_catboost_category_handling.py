@@ -7,7 +7,7 @@ from catboost import CatBoostClassifier
 from sklearn.metrics import average_precision_score, f1_score, roc_auc_score
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[2]
 OUTPUT = ROOT / "output"
 
 
