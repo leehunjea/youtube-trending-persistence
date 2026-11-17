@@ -4,9 +4,20 @@
 
 **Early Prediction of YouTube Trending Persistence**
 
-트렌딩에 진입한 영상의 초기 관측만으로 **트렌딩에 오래 머무를 영상**을 예측하는 연구입니다. 초기 K개 스냅샷에서 추출한 특징을 이용해 트리 기반 모델과 시계열 딥러닝 모델을 비교합니다.
+트렌딩에 진입한 영상의 초기 관측만으로 **트렌딩에 오래 머무를 영상**을 예측하는 연구입니다. KCI 등재 논문과 관련된 코드·실험 결과를 공개하며, 초기 K개 스냅샷에서 추출한 특징으로 트리 기반 모델과 시계열 딥러닝 모델을 비교합니다.
 
-[대표 결과](#대표-결과) · [주요 코드](#주요-코드) · [실행 안내](docs/DATA_AND_ENVIRONMENT.md) · [결과 출처](docs/RESULTS.md)
+[논문 정보](https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003397844) · [대표 결과](#대표-결과) · [주요 코드](#주요-코드) · [실행 안내](docs/DATA_AND_ENVIRONMENT.md) · [인용](#인용)
+
+## 관련 논문
+
+### 초기 스냅샷 기반 유튜브 트렌딩 지속성 조기 예측
+
+*Early Prediction of YouTube Trending Persistence from Initial Snapshots*
+
+**이훈제**, 박영아, 박준, 정세훈, 심춘보<br>
+스마트미디어저널 (*Smart Media Journal*), **15(10), 172–184**, 2026년 10월
+
+논문 초록에서 데이터 규모와 CatBoost(K=14)의 **ROC-AUC 0.8416 · AP 0.6294 · F1 0.6270**을 확인했으며, 저장된 v3 집계값과 일치합니다. [KCI 공식 기록](https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003397844) · [논문과 코드 안내](docs/PAPER.md)
 
 | 분석 대상 | 초기 관측 길이 | CatBoost ROC-AUC |
 |:---:|:---:|:---:|
@@ -79,4 +90,10 @@ docs/                 실행·코드·결과 출처 안내
 
 이 저장소는 연구 코드 아카이브입니다. 실행 시 저장소 루트를 작업 디렉터리로 사용하고, 필요한 데이터·전처리 배열·모델을 별도로 준비해야 합니다. [데이터와 환경 안내](docs/DATA_AND_ENVIRONMENT.md)
 
-원본 데이터, 영상별 예측값, 모델 가중치, 기존 가상환경, 논문 원고와 심사 대응 자료는 로컬 연구 아카이브에 보관합니다. 공개본에는 코드·설명·선별한 집계 결과를 포함했습니다.
+원본 데이터, 영상별 예측값, 모델 가중치, 논문 원고와 심사 대응 자료는 로컬 연구 아카이브에 보관합니다. 기존 가상환경의 설치 정보도 기록했으며, 실행 환경은 새로 구성합니다. 공개본에는 코드·설명·선별한 집계 결과를 포함했습니다.
+
+## 인용
+
+> 이훈제, 박영아, 박준, 정세훈, 심춘보. (2026). 초기 스냅샷 기반 유튜브 트렌딩 지속성 조기 예측. *스마트미디어저널*, 15(10), 172–184.
+
+[BibTeX](CITATION.bib) · [CITATION.cff](CITATION.cff) · [KCI 논문 정보](https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003397844)

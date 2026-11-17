@@ -48,7 +48,7 @@ K=14 조건의 저장된 test 결과입니다. F1은 validation set에서 선택
 
 ## 이전 원고·추가 실험과의 구분
 
-이전 `KCI_PAPER_DRAFT.md`와 일부 원고·그림에는 CatBoost ROC-AUC **0.8444**가 남아 있습니다. 공개 README와 위 표는 저장된 v3 집계의 **0.8416**을 사용합니다. 원고의 최종 게재 결과나 출판 상태를 확인한 수치로 표시하지 않습니다.
+이전 `KCI_PAPER_DRAFT.md`와 일부 원고·그림에는 CatBoost ROC-AUC **0.8444**가 남아 있습니다. 공개 README와 위 표는 저장된 v3 집계의 **0.8416**을 사용합니다. 2026년 11월 17일 [게재 논문의 KCI 공식 초록](https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003397844)에서 CatBoost(K=14)의 **ROC-AUC 0.8416, AP 0.6294, F1 0.6270**을 확인했으며, 저장 결과와 일치합니다. 다른 모델을 포함한 전체 비교 표는 공개 논문 본문과 대조하지 않았습니다. [논문 안내](PAPER.md)
 
 원본 시간순 분할 결과 `output/tab12_temporal_v3.csv`는 이미 생성된 표준화 배열을 다시 나누어 사용합니다. 시간순 학습 구간만으로 전처리를 독립적으로 다시 적합한 검증으로 보기 어려워 공개 대표 표에는 포함하지 않았습니다. 또한 원본 `output/paired_boot_v3.csv`의 모델 간 비교는 공통 영상 2,600개에 대한 결과로, 전체 test 표본과 동일하다고 가정하지 않습니다.
 

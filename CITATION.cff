@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "이 연구를 인용할 때 preferred-citation의 학술지 논문을 사용해 주세요. 저자 목록은 논문의 저자 정보입니다."
+title: "초기 스냅샷 기반 유튜브 트렌딩 지속성 조기 예측 연구 코드"
+type: software
+repository-code: "https://github.com/leehunjea/youtube-trending-persistence"
+authors:
+  - family-names: "이"
+    given-names: "훈제"
+  - family-names: "박"
+    given-names: "영아"
+  - family-names: "박"
+    given-names: "준"
+  - family-names: "정"
+    given-names: "세훈"
+  - family-names: "심"
+    given-names: "춘보"
+preferred-citation:
+  type: article
+  title: "초기 스냅샷 기반 유튜브 트렌딩 지속성 조기 예측"
+  authors:
+    - family-names: "이"
+      given-names: "훈제"
+    - family-names: "박"
+      given-names: "영아"
+    - family-names: "박"
+      given-names: "준"
+    - family-names: "정"
+      given-names: "세훈"
+    - family-names: "심"
+      given-names: "춘보"
+  journal: "스마트미디어저널"
+  volume: "15"
+  issue: "10"
+  start: 172
+  end: 184
+  year: 2026
+  month: 10
+  url: "https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003397844"

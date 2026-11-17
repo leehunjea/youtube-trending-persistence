@@ -1,10 +1,19 @@
-# Early Prediction of YouTube Trending Persistence
+# Early Prediction of YouTube Trending Persistence from Initial Snapshots
 
 [한국어](README.md) | **English**
 
-Predicting which videos will **remain in the trending list for longer**, using only their first K trending snapshots. This research compares tree-based models with sequence models using early observations and derived features.
+Predicting which videos will **remain in the trending list for longer**, using only their first K trending snapshots. This repository accompanies a KCI-indexed journal paper and compares tree-based models with sequence models using early observations and derived features.
 
-[Results](#results) · [Key code](#key-code) · [Data and environment](docs/DATA_AND_ENVIRONMENT.md) · [Result provenance](docs/RESULTS.md)
+[Paper](https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003397844) · [Results](#results) · [Key code](#key-code) · [Data and environment](docs/DATA_AND_ENVIRONMENT.md) · [Citation](#citation)
+
+## Publication
+
+### Early Prediction of YouTube Trending Persistence from Initial Snapshots
+
+**이훈제**, 박영아, 박준, 정세훈, 심춘보<br>
+*Smart Media Journal*, **15(10), 172–184**, October 2026
+
+The official abstract confirms the dataset size and CatBoost (K=14) results: **ROC-AUC 0.8416 · AP 0.6294 · F1 0.6270**, matching the archived v3 aggregates. Author names follow the KCI record. [Official KCI record](https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003397844) · [Paper and code notes](docs/PAPER.md) (Korean)
 
 | Study population | Early observation length | CatBoost ROC-AUC |
 |:---:|:---:|:---:|
@@ -77,4 +86,10 @@ docs/                 Environment, code, and result provenance notes
 
 Run scripts from the repository root after preparing the required data, processed arrays, and model files. This is a research code archive; the [data and environment guide](docs/DATA_AND_ENVIRONMENT.md) includes setup notes and an English summary.
 
-Raw data, per-video predictions, model weights, original environments, manuscripts, and review correspondence remain in the local research archive. The public package contains code, documentation, and selected aggregate results.
+Raw data, per-video predictions, model weights, manuscripts, and review correspondence remain in the local research archive. Installation metadata from the original environments is retained; create a fresh environment to run experiments. The public package contains code, documentation, and selected aggregate results.
+
+## Citation
+
+> 이훈제, 박영아, 박준, 정세훈, 심춘보. (2026). Early Prediction of YouTube Trending Persistence from Initial Snapshots. *Smart Media Journal*, 15(10), 172–184.
+
+[BibTeX](CITATION.bib) · [CITATION.cff](CITATION.cff) · [KCI record](https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART003397844)

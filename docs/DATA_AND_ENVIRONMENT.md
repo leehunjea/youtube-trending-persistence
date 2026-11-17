@@ -22,7 +22,7 @@ python -m venv .venv
 .\.venv\Scripts\python -m pip install -r requirements.txt
 ~~~
 
-모델 학습에는 PyTorch와 장치에 맞는 실행 환경이 필요합니다. 기존 환경 폴더는 로컬에 보관했지만, 이동 전 경로를 담은 실행 파일과 설정이 있을 수 있으므로 새 경로에서 환경을 다시 구성합니다.
+모델 학습에는 PyTorch와 장치에 맞는 실행 환경이 필요합니다. 기존 환경 폴더는 사용자 승인 후 정리했으며, 패키지 목록과 설치 메타데이터는 로컬 감사 기록에 보존했습니다. 새 경로에서 환경을 다시 구성합니다.
 
 아래는 정리 당시 **설치 메타데이터에서 읽은 버전**이며, 어떤 환경이 모든 결과를 생성했는지는 확정하지 않았습니다.
 
@@ -45,6 +45,8 @@ python -m venv .venv
 2. 전처리를 시작하려면 원본 CSV를 준비하고 2_preprocess.py, 4_make_sequence.py의 설정을 확인합니다.
 3. 후속 실험은 기존 전처리 파일·모델 등 각 스크립트가 읽는 입력을 확인한 뒤 실행합니다.
 
+선택적 점검 도구인 1_load_data.py는 output/raw_popular.csv와 output/raw_tag.csv를 추가로 내보냅니다. 현재 전처리는 이 사본이 아닌 원본 CSV를 직접 읽습니다. 로컬의 기존 내보내기 사본 두 개(약 58.7GB)는 정리했으며, 이 도구를 실행하면 다시 생성될 수 있습니다.
+
 일부 스크립트는 실행 즉시 학습하거나 기존 출력 파일을 덮어씁니다. 특히 ml_tables_v3_temporal.py는 ml_tables_v3를 import하면서 해당 모듈의 최상위 학습 코드도 실행합니다. 전체 파일을 일괄 import하는 방식으로 검사하지 않습니다.
 
 공개 준비에서는 Python 문법, 파일 연결, 집계 수치, 공개 범위를 확인했으며 학습·추론·원본 데이터 재처리는 실행하지 않았습니다. 연구 코드에 새 라이선스를 임의로 부여하지 않았습니다.
@@ -53,6 +55,8 @@ python -m venv .venv
 
 Keep the original CSVs under data/youtube_trends/ and run scripts from the repository root. Generated arrays and predictions belong in output/; checkpoints belong in models/. These directories are excluded from Git.
 
-Create a fresh environment and install the direct dependencies in requirements.txt. The version table above records metadata from two archived environments; it is not a tested lockfile or a claim that either environment reproduces all results. Existing environment launchers may contain old absolute paths.
+Create a fresh environment and install the direct dependencies in requirements.txt. The version table above records metadata from two former environments; it is not a tested lockfile or a claim that either environment reproduces all results. The environment directories were removed with approval after preserving package lists and installation metadata.
+
+The optional 1_load_data.py tool exports output/raw_popular.csv and output/raw_tag.csv. Current preprocessing reads the original CSVs directly. The old exports (about 58.7GB) were removed during cleanup; running this optional tool can regenerate them.
 
 Choose an experiment branch using the code map. Some scripts train at module scope and overwrite outputs. Importing ml_tables_v3_temporal.py also triggers the top-level training code in ml_tables_v3. Validation during packaging was static; training, inference, and full data processing were not rerun.
